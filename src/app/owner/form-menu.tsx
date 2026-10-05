@@ -16,7 +16,7 @@ export default function FormMenuScreen() {
   const [harga, setHarga] = useState(menuLama ? String(menuLama.price) : "");
   const [gambar, setGambar] = useState(menuLama?.gambar ?? "");
 
-  if (!owner) return <Redirect href="/owner/login" />;
+  if (!owner) return <Redirect href="/" />;
 
   // Cek isian, lalu simpan sebagai menu baru atau perubahan menu lama
   const handleSimpan = () => {

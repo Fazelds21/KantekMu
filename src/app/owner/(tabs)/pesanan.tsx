@@ -6,7 +6,7 @@ import PageHeader from "@/components/PageHeader";
 export default function OwnerPesananScreen() {
   const { owner, pesanan } = useApp();
 
-  if (!owner) return <Redirect href="/owner/login" />;
+  if (!owner) return <Redirect href="/" />;
 
   // Ambil hanya item milik warung ini. Pesanan yang tidak punya item warung ini dibuang.
   const pesananMasuk = pesanan
