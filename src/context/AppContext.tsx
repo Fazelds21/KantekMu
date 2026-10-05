@@ -1,20 +1,20 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 // ====== TYPE ======
 export type MenuItem = {
   id: string;
   name: string;
   price: number;
-  gambar?: string;   // link gambar (boleh kosong)
+  gambar?: string;
 };
 
 export type CartItem = {
-  id: string;        // id menu (harus unik, misal "w1-m1")
+  id: string;
   name: string;
   price: number;
   qty: number;
   warungId: string;
-  warung: string;    // nama warung
+  warung: string;
 };
 
 export type OrderItem = {
@@ -23,14 +23,14 @@ export type OrderItem = {
   menu: string;
   qty: number;
   harga: number;
-  isReceived: boolean; // konfirmasi diterima, PER ITEM
-  catatan?: string;    // catatan pesanan (boleh kosong)
+  isReceived: boolean;
+  catatan?: string;
 };
 
 export type Pesanan = {
-  id: number;        // nomor pesanan, contoh 105
+  id: number;
   meja: string;
-  waktu: string;     // jam pesanan, contoh "12.35"
+  waktu: string;
   items: OrderItem[];
 };
 
@@ -41,13 +41,11 @@ export type OwnerAkun = {
   namaWarung: string;
 };
 
-// ====== DATA AWAL (nanti diganti data dari backend) ======
 export const DAFTAR_OWNER: OwnerAkun[] = [
   { username: "busiti", password: "1234", warungId: "1", namaWarung: "Warung Bu Siti" },
   { username: "sotolamongan", password: "1234", warungId: "2", namaWarung: "Warung Soto Lamongan" },
 ];
 
-// Menu tiap warung (kunci = id warung)
 const MENU_AWAL: Record<string, MenuItem[]> = {
   "1": [
     { id: "w1-m1", name: "Ayam Bakar", price: 25000 },
@@ -61,9 +59,7 @@ const MENU_AWAL: Record<string, MenuItem[]> = {
   ],
 };
 
-// ====== ISI "TEMPAT DATA BERSAMA" ======
 type AppContextType = {
-  // customer
   nomorMeja: string;
   setNomorMeja: (meja: string) => void;
   cart: CartItem[];
@@ -72,14 +68,10 @@ type AppContextType = {
   checkout: () => void;
   pesanan: Pesanan[];
   konfirmasiDiterima: (pesananId: number, itemId: string) => void;
-
-  // menu (dipakai customer & owner)
   menu: Record<string, MenuItem[]>;
   tambahMenu: (warungId: string, data: Omit<MenuItem, "id">) => void;
   ubahMenu: (warungId: string, menuId: string, data: Omit<MenuItem, "id">) => void;
   hapusMenu: (warungId: string, menuId: string) => void;
-
-  // owner yang sedang login (null = belum login)
   owner: OwnerAkun | null;
   setOwner: (akun: OwnerAkun | null) => void;
 };
@@ -93,9 +85,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [menu, setMenu] = useState<Record<string, MenuItem[]>>(MENU_AWAL);
   const [owner, setOwner] = useState<OwnerAkun | null>(null);
 
-  // ----- CUSTOMER -----
-
-  // Tambah menu ke keranjang. Kalau menu sudah ada, jumlahnya +1
   const tambahKeKeranjang = (item: Omit<CartItem, "qty">) => {
     const sudahAda = cart.find((c) => c.id === item.id);
     if (sudahAda) {
@@ -105,7 +94,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // perubahan = +1 atau -1. Kalau jumlah jadi 0, item dihapus dari keranjang
   const ubahJumlah = (id: string, perubahan: number) => {
     setCart(
       cart
@@ -114,7 +102,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  // Checkout: isi keranjang diubah jadi 1 pesanan baru, lalu keranjang dikosongkan
   const checkout = () => {
     const pesananBaru: Pesanan = {
       id: 105 + pesanan.length,
@@ -133,7 +120,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
 
-  // Tandai SATU item sebagai diterima
   const konfirmasiDiterima = (pesananId: number, itemId: string) => {
     setPesanan(
       pesanan.map((p) =>
@@ -143,8 +129,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       )
     );
   };
-
-  // ----- OWNER: KELOLA MENU -----
 
   const tambahMenu = (warungId: string, data: Omit<MenuItem, "id">) => {
     const menuBaru: MenuItem = { id: `w${warungId}-${Date.now()}`, ...data };
@@ -165,9 +149,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider
       value={{
-        nomorMeja, setNomorMeja, cart, tambahKeKeranjang, ubahJumlah, checkout, pesanan, konfirmasiDiterima,
-        menu, tambahMenu, ubahMenu, hapusMenu,
-        owner, setOwner,
+        nomorMeja,
+        setNomorMeja,
+        cart,
+        tambahKeKeranjang,
+        ubahJumlah,
+        checkout,
+        pesanan,
+        konfirmasiDiterima,
+        menu,
+        tambahMenu,
+        ubahMenu,
+        hapusMenu,
+        owner,
+        setOwner,
       }}
     >
       {children}
@@ -175,7 +170,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Dipakai di halaman: const { cart } = useApp();
 export function useApp() {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error("useApp harus dipakai di dalam AppProvider");
