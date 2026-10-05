@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { styles } from "../styles/loginStyles";
+import { router } from "expo-router";
 
 type LoginRole = "owner" | "customer";
 
@@ -158,11 +159,18 @@ export default function LoginPage() {
 
         <Pressable
           accessibilityRole="button"
-          style={({ pressed }) => [
-            styles.loginButton,
-            pressed && styles.loginButtonPressed,
-          ]}
-        >
+          onPress={() => {
+            if (role === "customer") {
+              router.replace("/customer");
+            } else {
+              router.replace("/owner");
+            }
+  }}
+  style={({ pressed }) => [
+    styles.loginButton,
+    pressed && styles.loginButtonPressed,
+  ]}
+>
           <Text style={styles.loginButtonText}>
             Masuk sebagai {getRoleLabel(role)}
           </Text>
