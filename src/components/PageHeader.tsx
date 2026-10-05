@@ -6,20 +6,22 @@ import { useRouter } from "expo-router";
 type PageHeaderProps = {
   title: string;
   image?: ImageSourcePropType; // kalau kosong, pakai banner KantekMu
+  showBack?: boolean;          // kalau false, tombol kembali disembunyikan
 };
 
 export default function PageHeader({
   title,
   image = require("@/assets/images/KantekMu.png"),
+  showBack = true,
 }: PageHeaderProps) {
   const router = useRouter();
 
-  // Kalau ada halaman sebelumnya mundur, kalau tidak ada balik ke dashboard
+  // Kalau ada halaman sebelumnya mundur, kalau tidak ada balik ke halaman utama
   const handleBack = () => {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace("/customer");
+      router.replace("/");
     }
   };
 
@@ -27,9 +29,11 @@ export default function PageHeader({
     <View>
       <ImageBackground source={image} style={styles.banner} resizeMode="cover">
         <View style={styles.overlay}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Feather name="chevron-left" size={20} color="#000" />
-          </TouchableOpacity>
+          {showBack && (
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <Feather name="chevron-left" size={20} color="#000" />
+            </TouchableOpacity>
+          )}
         </View>
       </ImageBackground>
 
