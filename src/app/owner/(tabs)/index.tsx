@@ -7,8 +7,7 @@ export default function OwnerBerandaScreen() {
   const router = useRouter();
   const { owner, setOwner, pesanan, menu } = useApp();
 
-  // Kalau belum login, kembalikan ke halaman login
-  if (!owner) return <Redirect href="/owner/login" />;
+  if (!owner) return <Redirect href="/" />;
 
   // Ringkasan untuk warung ini
 // Ambil pesanan milik warung ini (item warung lain dibuang)
@@ -23,7 +22,7 @@ export default function OwnerBerandaScreen() {
 
   const handleLogout = () => {
     setOwner(null);
-    router.replace("/owner/login");
+    router.replace("/");
   };
 
   return (

@@ -8,7 +8,7 @@ export default function OwnerMenuScreen() {
   const router = useRouter();
   const { owner, menu, hapusMenu } = useApp();
 
-  if (!owner) return <Redirect href="/owner/login" />;
+  if (!owner) return <Redirect href="/" />;
 
   const daftarMenu = menu[owner.warungId] ?? [];
 

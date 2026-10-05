@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { styles } from "../styles/loginStyles";
 import { router } from "expo-router";
+import { DAFTAR_OWNER, useApp, type OwnerAkun } from "../context/AppContext";
 
 type LoginRole = "owner" | "customer";
 
@@ -56,10 +57,12 @@ function getRoleLabel(role: LoginRole): string {
 }
 
 export default function LoginPage() {
+  const { setOwner } = useApp();
   const { width } = useWindowDimensions();
   const isWide = width >= 850;
   const [role, setRole] = useState<LoginRole>("customer");
   const [rememberMe, setRememberMe] = useState(false);
+  const [selectedOwner, setSelectedOwner] = useState<OwnerAkun | null>(null);
 
   const loginForm = (
     <View
@@ -123,23 +126,44 @@ export default function LoginPage() {
           </Text>
         </View>
 
-        {LOGIN_FIELDS.map((field) => (
-          <View key={field.id} style={styles.inputGroup}>
-            <Text style={styles.fieldLabel}>{field.label}</Text>
-            <TextInput
-              accessibilityLabel={field.label}
-              autoCapitalize={field.autoCapitalize}
-              autoCorrect={field.autoCorrect}
-              keyboardType={field.keyboardType}
-              nativeID={`login-${field.id}`}
-              placeholder={field.placeholder}
-              placeholderTextColor="#9A9AAF"
-              secureTextEntry={field.secureTextEntry}
-              selectionColor="#6B2EEF"
-              style={styles.textInput}
-            />
+        {role === "owner" ? (
+          <View style={styles.ownerAccountList}>
+            <Text style={styles.fieldLabel}>Pilih akun owner</Text>
+            {DAFTAR_OWNER.map((akun) => (
+              <Pressable
+                key={akun.username}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: selectedOwner?.username === akun.username }}
+                onPress={() => setSelectedOwner(akun)}
+                style={[
+                  styles.ownerAccountOption,
+                  selectedOwner?.username === akun.username && styles.selectedOwnerAccountOption,
+                ]}
+              >
+                <Text style={styles.ownerAccountName}>{akun.namaWarung}</Text>
+                <Text style={styles.ownerAccountUsername}>@{akun.username}</Text>
+              </Pressable>
+            ))}
           </View>
-        ))}
+        ) : (
+          LOGIN_FIELDS.map((field) => (
+            <View key={field.id} style={styles.inputGroup}>
+              <Text style={styles.fieldLabel}>{field.label}</Text>
+              <TextInput
+                accessibilityLabel={field.label}
+                autoCapitalize={field.autoCapitalize}
+                autoCorrect={field.autoCorrect}
+                keyboardType={field.keyboardType}
+                nativeID={`login-${field.id}`}
+                placeholder={field.placeholder}
+                placeholderTextColor="#9A9AAF"
+                secureTextEntry={field.secureTextEntry}
+                selectionColor="#6B2EEF"
+                style={styles.textInput}
+              />
+            </View>
+          ))
+        )}
 
         <View style={styles.formOptions}>
           <View style={styles.rememberOption}>
@@ -159,18 +183,24 @@ export default function LoginPage() {
 
         <Pressable
           accessibilityRole="button"
+          accessibilityState={{
+            disabled: role === "owner" && selectedOwner === null,
+          }}
+          disabled={role === "owner" && selectedOwner === null}
           onPress={() => {
             if (role === "customer") {
               router.replace("/customer");
-            } else {
+            } else if (selectedOwner) {
+              setOwner(selectedOwner);
               router.replace("/owner");
             }
-  }}
-  style={({ pressed }) => [
-    styles.loginButton,
-    pressed && styles.loginButtonPressed,
-  ]}
->
+          }}
+          style={({ pressed }) => [
+            styles.loginButton,
+            pressed && styles.loginButtonPressed,
+            role === "owner" && selectedOwner === null && styles.loginButtonDisabled,
+          ]}
+        >
           <Text style={styles.loginButtonText}>
             Masuk sebagai {getRoleLabel(role)}
           </Text>
