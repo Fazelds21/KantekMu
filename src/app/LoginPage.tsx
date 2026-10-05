@@ -1,8 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  Animated,
   KeyboardAvoidingView,
-  PanResponder,
   Platform,
   Pressable,
   ScrollView,
@@ -16,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { styles } from "../styles/loginStyles";
+import { router } from "expo-router";
 
 type LoginRole = "owner" | "customer";
 
@@ -61,53 +60,6 @@ export default function LoginPage() {
   const isWide = width >= 850;
   const [role, setRole] = useState<LoginRole>("customer");
   const [rememberMe, setRememberMe] = useState(false);
-  const [selectorWidth, setSelectorWidth] = useState(0);
-  const [sliderX] = useState(() => new Animated.Value(0));
-
-  const roleSelectorResponder = useMemo(
-    () =>
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        sliderX.stopAnimation();
-      },
-      onPanResponderMove: (_, gestureState) => {
-        const halfWidth = selectorWidth / 2 - 4;
-        const startX = role === "customer" ? halfWidth : 0;
-        const nextX = Math.max(
-          0,
-          Math.min(halfWidth, startX + gestureState.dx),
-        );
-        sliderX.setValue(nextX);
-      },
-      onPanResponderRelease: (event, gestureState) => {
-        const halfWidth = selectorWidth / 2 - 4;
-        const isTap = Math.abs(gestureState.dx) < 6;
-        const shouldSelectCustomer = isTap
-          ? event.nativeEvent.locationX >= selectorWidth / 2
-          : (role === "customer" ? halfWidth : 0) + gestureState.dx >=
-            halfWidth / 2;
-        const nextRole = shouldSelectCustomer ? "customer" : "owner";
-        setRole(nextRole);
-        Animated.spring(sliderX, {
-          toValue: nextRole === "customer" ? halfWidth : 0,
-          useNativeDriver: true,
-          speed: 22,
-          bounciness: 4,
-        }).start();
-      },
-      onPanResponderTerminate: () => {
-        Animated.spring(sliderX, {
-          toValue: role === "customer" ? selectorWidth / 2 - 4 : 0,
-          useNativeDriver: true,
-          speed: 22,
-          bounciness: 4,
-        }).start();
-      },
-    }),
-    [role, selectorWidth, sliderX],
-  );
 
   const loginForm = (
     <View
@@ -135,26 +87,19 @@ export default function LoginPage() {
         <View style={styles.roleBlock}>
           <Text style={styles.fieldLabel}>Masuk sebagai</Text>
           <View
-            accessibilityRole="adjustable"
-            accessibilityLabel="Pilih jenis akun"
-            accessibilityValue={{ text: getRoleLabel(role) }}
             style={styles.roleSelector}
-            onLayout={(event) => {
-              const measuredWidth = event.nativeEvent.layout.width;
-              setSelectorWidth(measuredWidth);
-              sliderX.setValue(role === "customer" ? measuredWidth / 2 - 4 : 0);
-            }}
-            {...roleSelectorResponder.panHandlers}
           >
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                styles.roleSlider,
-                { transform: [{ translateX: sliderX }] },
-              ]}
-            />
             {LOGIN_ROLES.map((loginRole) => (
-              <View key={loginRole.value} style={styles.roleOption}>
+              <Pressable
+                key={loginRole.value}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: role === loginRole.value }}
+                onPress={() => setRole(loginRole.value)}
+                style={[
+                  styles.roleOption,
+                  role === loginRole.value && styles.selectedRoleOption,
+                ]}
+              >
                 <Text
                   style={[
                     styles.roleOptionText,
@@ -163,7 +108,7 @@ export default function LoginPage() {
                 >
                   {loginRole.label}
                 </Text>
-              </View>
+              </Pressable>
             ))}
           </View>
           <Text
@@ -214,11 +159,18 @@ export default function LoginPage() {
 
         <Pressable
           accessibilityRole="button"
-          style={({ pressed }) => [
-            styles.loginButton,
-            pressed && styles.loginButtonPressed,
-          ]}
-        >
+          onPress={() => {
+            if (role === "customer") {
+              router.replace("/customer");
+            } else {
+              router.replace("/owner");
+            }
+  }}
+  style={({ pressed }) => [
+    styles.loginButton,
+    pressed && styles.loginButtonPressed,
+  ]}
+>
           <Text style={styles.loginButtonText}>
             Masuk sebagai {getRoleLabel(role)}
           </Text>

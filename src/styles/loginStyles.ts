@@ -101,25 +101,19 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     overflow: "hidden",
   },
-  roleSlider: {
-    position: "absolute",
-    top: 4,
-    bottom: 4,
-    left: 4,
-    width: "50%",
+  roleOption: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 11,
+  },
+  selectedRoleOption: {
     backgroundColor: "#6B2EEF",
     shadowColor: "#6B2EEF",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 3,
-  },
-  roleOption: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1,
   },
   roleOptionText: {
     color: "#767487",
