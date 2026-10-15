@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 22,
     paddingBottom: 24,
-  },
+  }, 
   widePage: {
     flexDirection: "row",
     padding: 0,
