@@ -141,6 +141,31 @@ export const styles = StyleSheet.create({
     color: "#242238",
     fontSize: 14,
   },
+  ownerAccountList: {
+    marginBottom: 19,
+  },
+  ownerAccountOption: {
+    padding: 14,
+    marginBottom: 9,
+    borderWidth: 1,
+    borderColor: "#E5E3ED",
+    borderRadius: 13,
+    backgroundColor: "#FFFFFF",
+  },
+  selectedOwnerAccountOption: {
+    borderColor: "#6B2EEF",
+    backgroundColor: "#F5F1FF",
+  },
+  ownerAccountName: {
+    color: "#302E43",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  ownerAccountUsername: {
+    color: "#77768A",
+    fontSize: 12,
+    marginTop: 4,
+  },
   formOptions: {
     flexDirection: "row",
     alignItems: "center",
@@ -180,6 +205,9 @@ export const styles = StyleSheet.create({
   loginButtonPressed: {
     opacity: 0.88,
     transform: [{ scale: 0.99 }],
+  },
+  loginButtonDisabled: {
+    opacity: 0.5,
   },
   loginButtonText: {
     color: "#FFFFFF",
