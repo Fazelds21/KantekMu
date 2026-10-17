@@ -1,25 +1,20 @@
+import AuthPageLayout from "@/components/AuthPageLayout";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
-  ScrollView,
   Switch,
   Text,
   TextInput,
   type TextInputProps,
-  useWindowDimensions,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
 import { styles } from "../styles/loginStyles";
-import { router } from "expo-router";
 
 type LoginRole = "owner" | "customer";
 
 type LoginField = {
-  id: string;
+  userName: string;
   label: string;
   placeholder: string;
   keyboardType?: TextInputProps["keyboardType"];
@@ -30,7 +25,7 @@ type LoginField = {
 
 const LOGIN_FIELDS: LoginField[] = [
   {
-    id: "username",
+    userName: "username",
     label: "Username",
     placeholder: "Masukkan username",
     keyboardType: "email-address",
@@ -38,7 +33,7 @@ const LOGIN_FIELDS: LoginField[] = [
     autoCorrect: false,
   },
   {
-    id: "password",
+    userName: "password",
     label: "Password",
     placeholder: "Masukkan password",
     secureTextEntry: true,
@@ -51,30 +46,13 @@ const LOGIN_ROLES: { value: LoginRole; label: string }[] = [
   { value: "customer", label: "Customer" },
 ];
 
-function getRoleLabel(role: LoginRole): string {
-  return role === "owner" ? "Owner" : "Customer";
-}
-
 export default function LoginPage() {
-  const { width } = useWindowDimensions();
-  const isWide = width >= 850;
+  const ROUTER = useRouter();
   const [role, setRole] = useState<LoginRole>("customer");
   const [rememberMe, setRememberMe] = useState(false);
 
-  const loginForm = (
-    <View
-      nativeID="login-form-panel"
-      style={[styles.formPanel, isWide && styles.wideFormPanel]}
-    >
-      {!isWide && (
-        <View style={styles.mobileBrand}>
-          <View style={styles.brandMark}>
-            <Text style={styles.brandMarkText}>K</Text>
-          </View>
-          <Text style={styles.brandName}>KantekMu</Text>
-        </View>
-      )}
-
+  return (
+    <AuthPageLayout screenID="login-screen" panelID="login-form-panel">
       <View style={styles.formContent}>
         <View style={styles.headingBlock}>
           <Text style={styles.eyebrow}>SELAMAT DATANG</Text>
@@ -86,9 +64,7 @@ export default function LoginPage() {
 
         <View style={styles.roleBlock}>
           <Text style={styles.fieldLabel}>Masuk sebagai</Text>
-          <View
-            style={styles.roleSelector}
-          >
+          <View style={styles.roleSelector}>
             {LOGIN_ROLES.map((loginRole) => (
               <Pressable
                 key={loginRole.value}
@@ -124,14 +100,14 @@ export default function LoginPage() {
         </View>
 
         {LOGIN_FIELDS.map((field) => (
-          <View key={field.id} style={styles.inputGroup}>
+          <View key={field.userName} style={styles.inputGroup}>
             <Text style={styles.fieldLabel}>{field.label}</Text>
             <TextInput
               accessibilityLabel={field.label}
               autoCapitalize={field.autoCapitalize}
               autoCorrect={field.autoCorrect}
               keyboardType={field.keyboardType}
-              nativeID={`login-${field.id}`}
+              nativeID={`login-${field.userName}`}
               placeholder={field.placeholder}
               placeholderTextColor="#9A9AAF"
               secureTextEntry={field.secureTextEntry}
@@ -159,89 +135,27 @@ export default function LoginPage() {
 
         <Pressable
           accessibilityRole="button"
-          onPress={() => {
-            if (role === "customer") {
-              router.replace("/customer");
-            } else {
-              router.replace("/owner");
-            }
-  }}
-  style={({ pressed }) => [
-    styles.loginButton,
-    pressed && styles.loginButtonPressed,
-  ]}
->
+          style={({ pressed }) => [
+            styles.loginButton,
+            pressed && styles.loginButtonPressed,
+          ]}
+        >
           <Text style={styles.loginButtonText}>
-            Masuk sebagai {getRoleLabel(role)}
+            Masuk sebagai {role === "owner" ? "Owner" : "Customer"}
           </Text>
           <Text style={styles.loginButtonArrow}>→</Text>
         </Pressable>
 
         <View style={styles.signupPrompt}>
           <Text style={styles.signupText}>Belum punya akun? </Text>
-          <Pressable accessibilityRole="button">
+          <Pressable
+            onPress={() => ROUTER.replace("/owner/qr-preview")}
+            accessibilityRole="button"
+          >
             <Text style={styles.signupLink}>Daftar sekarang</Text>
           </Pressable>
         </View>
       </View>
-
-      <Text style={styles.footerText}>© 2026 KantekMu. Semua hak dilindungi.</Text>
-    </View>
-  );
-
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.keyboardContainer}
-      >
-        <ScrollView
-          nativeID="login-screen"
-          contentContainerStyle={[styles.page, isWide && styles.widePage]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {isWide && (
-            <View nativeID="login-hero" style={styles.heroPanel}>
-              <View style={styles.heroBrand}>
-                <View style={styles.heroBrandMark}>
-                  <Text style={styles.heroBrandMarkText}>K</Text>
-                </View>
-                <Text style={styles.heroBrandName}>KantekMu</Text>
-              </View>
-
-              <View style={styles.heroCopy}>
-                <Text style={styles.heroEyebrow}>PENGALAMAN MAKAN LEBIH BAIK</Text>
-                <Text style={styles.heroTitle}>
-                  Your Table.{"\n"}Your Order.{"\n"}Your Way.
-                </Text>
-                <Text style={styles.heroSubtitle}>
-                  Solusi kemudahan dalam pemesanan. Pesan meja favoritmu dan
-                  nikmati momen tanpa menunggu.
-                </Text>
-              </View>
-
-              <View style={styles.heroCard}>
-                <View style={styles.heroCardIcon}>
-                  <Text style={styles.heroCardIconText}>✓</Text>
-                </View>
-                <View style={styles.heroCardCopy}>
-                  <Text style={styles.heroCardTitle}>Semua jadi lebih mudah</Text>
-                  <Text style={styles.heroCardSubtitle}>
-                    Reservasi praktis, kapan saja.
-                  </Text>
-                </View>
-                <View style={styles.heroCardDot} />
-              </View>
-              <View style={styles.heroDecoration} />
-              <View style={styles.heroDecorationSmall} />
-            </View>
-          )}
-
-          {loginForm}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    </AuthPageLayout>
   );
 }

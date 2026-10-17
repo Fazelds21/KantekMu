@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#F7F7FB",
+    backgroundColor: "#FFFFFF",
   },
   keyboardContainer: {
     flex: 1,
@@ -13,10 +13,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 22,
     paddingBottom: 24,
-  },
+  }, 
   widePage: {
     flexDirection: "row",
-    padding: 0,
+    padding: 16,
     minHeight: "100%",
   },
   mobileBrand: {
@@ -51,6 +51,10 @@ export const styles = StyleSheet.create({
     maxWidth: 520,
     alignSelf: "center",
     justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+  },
+  emptyPanelSpace: {
+    flex: 1,
   },
   wideFormPanel: {
     maxWidth: 590,
@@ -193,6 +197,12 @@ export const styles = StyleSheet.create({
     marginLeft: 10,
     marginTop: -2,
   },
+  footerText: {
+    color: "#A3A2B0",
+    fontSize: 10,
+    textAlign: "center",
+    marginTop: 35,
+  },
   signupPrompt: {
     flexDirection: "row",
     justifyContent: "center",
@@ -207,12 +217,6 @@ export const styles = StyleSheet.create({
     color: "#6B2EEF",
     fontSize: 12,
     fontWeight: "700",
-  },
-  footerText: {
-    color: "#A3A2B0",
-    fontSize: 10,
-    textAlign: "center",
-    marginTop: 35,
   },
   heroPanel: {
     flex: 1,
