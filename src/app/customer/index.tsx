@@ -1,47 +1,23 @@
 import { useRouter } from "expo-router";
 import {
-  Image, ImageBackground, ImageSourcePropType, ScrollView, StatusBar, StyleSheet,
+  ActivityIndicator, ImageBackground, ScrollView, StatusBar, StyleSheet,
   Text, TouchableOpacity, View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useApp } from "@/context/AppContext";
 
-// ====== DATA ======
-
-// KETENTUAN: Menerapkan Type
-type WarungType = {
-  id: string;
-  name: string;
-  rating: string;
-  distance: string;
-  status: string;
-  categories: string;
-  badge: string;
-  badgeType: string;
-  badgeLabel?: string;
-  image: ImageSourcePropType;
-};
-
-// KETENTUAN: Menerapkan Array of Objects
-const WARUNG_LIST: WarungType[] = [
-  {
-    id: "1", name: "Warung Bu Siti", rating: "4.8", distance: "150m", status: "Buka",
-    categories: "Ayam Bakar, Nasi Uduk, Soto Lamon...", badge: "Paling Laris", badgeType: "fire",
-    badgeLabel: "Meja Anda", image: require("@/assets/images/ayam-bakar.jpeg"),
-  },
-  {
-    id: "2", name: "Warung Soto Lamongan", rating: "4.7", distance: "200m", status: "Buka",
-    categories: "Soto Ayam Koya Gurih, Rawon Dagin...", badge: "Antar ~10 mnt", badgeType: "clock",
-    image: require("@/assets/images/soto-lamongan.jpeg"),
-  },
-];
-
-// ====== HALAMAN ======
 export default function CustomerDashboard() {
   const router = useRouter();
-  const { nomorMeja, cart, pesanan } = useApp(); // data bersama
+  const {
+    nomorMeja,
+    cart,
+    pesanan,
+    warungList,
+    menu,
+    menuLoading,
+    menuError,
+  } = useApp();
 
-  // KETENTUAN: Menerapkan Deklarasi Custom Function
   const handlePilihWarung = (id: string, nama: string) => {
     router.push({
       pathname: "/customer/[id]",
@@ -53,7 +29,6 @@ export default function CustomerDashboard() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <StatusBar barStyle="light-content" />
 
-      {/* BANNER: tombol pesanan & keranjang */}
       <ImageBackground source={require("@/assets/images/KantekMu.png")} style={styles.bannerBackground} resizeMode="cover">
         <View style={styles.overlay}>
           <View style={styles.headerRow}>
@@ -73,24 +48,33 @@ export default function CustomerDashboard() {
         </View>
       </ImageBackground>
 
-      {/* FITUR: Melihat nomor meja */}
       <View style={styles.nomorMeja}>
         <Text style={styles.nomorMejaText}>Nomor Meja: {nomorMeja}</Text>
       </View>
 
-      {/* DAFTAR WARUNG */}
       <View style={styles.sectionContainer}>
         <Text style={styles.pesananAktif}>Pesanan aktif: {pesanan.length}</Text>
         <Text style={styles.sectionTitle}>Warung Sekitar</Text>
 
-        {/* KETENTUAN: Menerapkan Loop & FITUR: Melihat daftar warung */}
-        {WARUNG_LIST.map((item) => (
-          <TouchableOpacity key={item.id} style={styles.card} onPress={() => handlePilihWarung(item.id, item.name)}>
-            <Image source={item.image} style={styles.cardImage} />
+        {menuLoading && <ActivityIndicator />}
+        {menuError && <Text style={styles.emptyMessage}>{menuError}</Text>}
+        {!menuLoading && !menuError && warungList.length === 0 && (
+          <Text style={styles.emptyMessage}>Belum ada warung terdaftar.</Text>
+        )}
+        {warungList.map((warung) => (
+          <TouchableOpacity
+            key={warung.id}
+            style={styles.card}
+            onPress={() => handlePilihWarung(warung.id, warung.name)}
+          >
+            <View style={styles.cardImagePlaceholder}>
+              <Feather name="shopping-bag" size={30} color="#C2410C" />
+            </View>
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{item.name}</Text>
-              {/* KETENTUAN: Menerapkan Inline Style */}
-              <Text style={{ fontSize: 12, color: "#6B7280" }}>{item.categories}</Text>
+              <Text style={styles.cardTitle}>{warung.name}</Text>
+              <Text style={{ fontSize: 12, color: "#6B7280" }}>
+                {menu[warung.id]?.length ?? 0} menu tersedia
+              </Text>
             </View>
           </TouchableOpacity>
         ))}
@@ -120,8 +104,9 @@ const styles = StyleSheet.create({
   sectionContainer: { padding: 16 },
   pesananAktif: { marginBottom: 12, color: "#6B7280" },
   sectionTitle: { fontSize: 18, fontWeight: "700", marginBottom: 16 },
+  emptyMessage: { textAlign: "center", marginBottom: 12, color: "#6B7280" },
   card: { flexDirection: "row", backgroundColor: "#CCD5AE", borderRadius: 16, padding: 12, marginBottom: 12, elevation: 2 },
-  cardImage: { width: 90, height: 90, borderRadius: 12 },
+  cardImagePlaceholder: { width: 90, height: 90, borderRadius: 12, backgroundColor: "#E9EDC9", justifyContent: "center", alignItems: "center" },
   cardContent: { flex: 1, marginLeft: 12, justifyContent: "center" },
   cardTitle: { fontSize: 15, fontWeight: "700" },
 });

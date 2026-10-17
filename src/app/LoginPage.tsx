@@ -1,3 +1,5 @@
+import AuthPageLayout from "@/components/AuthPageLayout";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Pressable,
@@ -7,9 +9,7 @@ import {
   type TextInputProps,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { styles } from "../styles/loginStyles";
-import AuthPageLayout from "@/components/AuthPageLayout";
 
 type LoginRole = "owner" | "customer";
 
@@ -148,7 +148,10 @@ export default function LoginPage() {
 
         <View style={styles.signupPrompt}>
           <Text style={styles.signupText}>Belum punya akun? </Text>
-          <Pressable onPress={() => ROUTER.replace("/registerPage")} accessibilityRole="button">
+          <Pressable
+            onPress={() => ROUTER.replace("/owner/qr-preview")}
+            accessibilityRole="button"
+          >
             <Text style={styles.signupLink}>Daftar sekarang</Text>
           </Pressable>
         </View>

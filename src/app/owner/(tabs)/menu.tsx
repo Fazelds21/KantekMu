@@ -6,7 +6,7 @@ import PageHeader from "@/components/PageHeader";
 
 export default function OwnerMenuScreen() {
   const router = useRouter();
-  const { owner, menu, hapusMenu } = useApp();
+  const { owner, menu, menuError, menuLoading, hapusMenu } = useApp();
 
   if (!owner) return <Redirect href="/" />;
 
@@ -16,7 +16,21 @@ export default function OwnerMenuScreen() {
   const handleHapus = (menuId: string, nama: string) => {
     Alert.alert("Hapus Menu", `Yakin ingin menghapus ${nama}?`, [
       { text: "Batal", style: "cancel" },
-      { text: "Hapus", style: "destructive", onPress: () => hapusMenu(owner.warungId, menuId) },
+      {
+        text: "Hapus",
+        style: "destructive",
+        onPress: () => {
+          void hapusMenu(owner.warungId, menuId).catch((error: unknown) => {
+            console.error("Gagal menghapus menu:", error);
+            Alert.alert(
+              "Gagal menghapus menu",
+              error instanceof Error
+                ? error.message
+                : "Terjadi kesalahan database.",
+            );
+          });
+        },
+      },
     ]);
   };
 
@@ -28,7 +42,11 @@ export default function OwnerMenuScreen() {
         <Text style={styles.tambahText}>Tambah Menu</Text>
       </TouchableOpacity>
 
-      {daftarMenu.length === 0 && <Text style={styles.emptyText}>Belum ada menu</Text>}
+      {menuLoading && <Text style={styles.emptyText}>Memuat menu...</Text>}
+      {menuError && <Text style={styles.emptyText}>{menuError}</Text>}
+      {!menuLoading && !menuError && daftarMenu.length === 0 && (
+        <Text style={styles.emptyText}>Belum ada menu</Text>
+      )}
 
       {/* Loop daftar menu */}
       {daftarMenu.map((m) => (
