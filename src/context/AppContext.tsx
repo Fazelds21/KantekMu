@@ -34,17 +34,10 @@ export type Pesanan = {
   items: OrderItem[];
 };
 
-export type OwnerAkun = {
-  username: string;
-  password: string;
+export type OwnerWarung = {
   warungId: string;
   namaWarung: string;
 };
-
-export const DAFTAR_OWNER: OwnerAkun[] = [
-  { username: "busiti", password: "1234", warungId: "1", namaWarung: "Warung Bu Siti" },
-  { username: "sotolamongan", password: "1234", warungId: "2", namaWarung: "Warung Soto Lamongan" },
-];
 
 const MENU_AWAL: Record<string, MenuItem[]> = {
   "1": [
@@ -72,8 +65,8 @@ type AppContextType = {
   tambahMenu: (warungId: string, data: Omit<MenuItem, "id">) => void;
   ubahMenu: (warungId: string, menuId: string, data: Omit<MenuItem, "id">) => void;
   hapusMenu: (warungId: string, menuId: string) => void;
-  owner: OwnerAkun | null;
-  setOwner: (akun: OwnerAkun | null) => void;
+  owner: OwnerWarung | null;
+  setOwner: (owner: OwnerWarung | null) => void;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -83,7 +76,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pesanan, setPesanan] = useState<Pesanan[]>([]);
   const [menu, setMenu] = useState<Record<string, MenuItem[]>>(MENU_AWAL);
-  const [owner, setOwner] = useState<OwnerAkun | null>(null);
+  const [owner, setOwner] = useState<OwnerWarung | null>(null);
 
   const tambahKeKeranjang = (item: Omit<CartItem, "qty">) => {
     const sudahAda = cart.find((c) => c.id === item.id);

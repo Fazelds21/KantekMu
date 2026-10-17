@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#F7F7FB",
+    backgroundColor: "#FFFFFF",
   },
   keyboardContainer: {
     flex: 1,
@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
   }, 
   widePage: {
     flexDirection: "row",
-    padding: 0,
+    padding: 16,
     minHeight: "100%",
   },
   mobileBrand: {
@@ -51,6 +51,10 @@ export const styles = StyleSheet.create({
     maxWidth: 520,
     alignSelf: "center",
     justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+  },
+  emptyPanelSpace: {
+    flex: 1,
   },
   wideFormPanel: {
     maxWidth: 590,
@@ -141,31 +145,6 @@ export const styles = StyleSheet.create({
     color: "#242238",
     fontSize: 14,
   },
-  ownerAccountList: {
-    marginBottom: 19,
-  },
-  ownerAccountOption: {
-    padding: 14,
-    marginBottom: 9,
-    borderWidth: 1,
-    borderColor: "#E5E3ED",
-    borderRadius: 13,
-    backgroundColor: "#FFFFFF",
-  },
-  selectedOwnerAccountOption: {
-    borderColor: "#6B2EEF",
-    backgroundColor: "#F5F1FF",
-  },
-  ownerAccountName: {
-    color: "#302E43",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  ownerAccountUsername: {
-    color: "#77768A",
-    fontSize: 12,
-    marginTop: 4,
-  },
   formOptions: {
     flexDirection: "row",
     alignItems: "center",
@@ -206,9 +185,6 @@ export const styles = StyleSheet.create({
     opacity: 0.88,
     transform: [{ scale: 0.99 }],
   },
-  loginButtonDisabled: {
-    opacity: 0.5,
-  },
   loginButtonText: {
     color: "#FFFFFF",
     fontSize: 14,
@@ -220,6 +196,12 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
     marginLeft: 10,
     marginTop: -2,
+  },
+  footerText: {
+    color: "#A3A2B0",
+    fontSize: 10,
+    textAlign: "center",
+    marginTop: 35,
   },
   signupPrompt: {
     flexDirection: "row",
@@ -235,12 +217,6 @@ export const styles = StyleSheet.create({
     color: "#6B2EEF",
     fontSize: 12,
     fontWeight: "700",
-  },
-  footerText: {
-    color: "#A3A2B0",
-    fontSize: 10,
-    textAlign: "center",
-    marginTop: 35,
   },
   heroPanel: {
     flex: 1,

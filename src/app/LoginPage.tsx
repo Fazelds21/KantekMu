@@ -1,27 +1,20 @@
 import { useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
-  ScrollView,
   Switch,
   Text,
   TextInput,
   type TextInputProps,
-  useWindowDimensions,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar"; 
+import { useRouter } from "expo-router";
 import { styles } from "../styles/loginStyles";
-import { router } from "expo-router";
-import { DAFTAR_OWNER, useApp, type OwnerAkun } from "../context/AppContext";
-import HeroPanel from "@/components/HeroPanel";
+import AuthPageLayout from "@/components/AuthPageLayout";
 
 type LoginRole = "owner" | "customer";
 
 type LoginField = {
-  id: string;
+  userName: string;
   label: string;
   placeholder: string;
   keyboardType?: TextInputProps["keyboardType"];
@@ -32,7 +25,7 @@ type LoginField = {
 
 const LOGIN_FIELDS: LoginField[] = [
   {
-    id: "username",
+    userName: "username",
     label: "Username",
     placeholder: "Masukkan username",
     keyboardType: "email-address",
@@ -40,7 +33,7 @@ const LOGIN_FIELDS: LoginField[] = [
     autoCorrect: false,
   },
   {
-    id: "password",
+    userName: "password",
     label: "Password",
     placeholder: "Masukkan password",
     secureTextEntry: true,
@@ -53,32 +46,13 @@ const LOGIN_ROLES: { value: LoginRole; label: string }[] = [
   { value: "customer", label: "Customer" },
 ];
 
-function getRoleLabel(role: LoginRole): string {
-  return role === "owner" ? "Owner" : "Customer";
-}
-
 export default function LoginPage() {
-  const { setOwner } = useApp();
-  const { width } = useWindowDimensions();
-  const isWide = width >= 850;
+  const ROUTER = useRouter();
   const [role, setRole] = useState<LoginRole>("customer");
   const [rememberMe, setRememberMe] = useState(false);
-  const [selectedOwner, setSelectedOwner] = useState<OwnerAkun | null>(null);
 
-  const loginForm = (
-    <View
-      nativeID="login-form-panel"
-      style={[styles.formPanel, isWide && styles.wideFormPanel]}
-    >
-      {!isWide && (
-        <View style={styles.mobileBrand}>
-          <View style={styles.brandMark}>
-            <Text style={styles.brandMarkText}>K</Text>
-          </View>
-          <Text style={styles.brandName}>KantekMu</Text>
-        </View>
-      )}
-
+  return (
+    <AuthPageLayout screenID="login-screen" panelID="login-form-panel">
       <View style={styles.formContent}>
         <View style={styles.headingBlock}>
           <Text style={styles.eyebrow}>SELAMAT DATANG</Text>
@@ -90,9 +64,7 @@ export default function LoginPage() {
 
         <View style={styles.roleBlock}>
           <Text style={styles.fieldLabel}>Masuk sebagai</Text>
-          <View
-            style={styles.roleSelector}
-          >
+          <View style={styles.roleSelector}>
             {LOGIN_ROLES.map((loginRole) => (
               <Pressable
                 key={loginRole.value}
@@ -127,44 +99,23 @@ export default function LoginPage() {
           </Text>
         </View>
 
-        {role === "owner" ? (
-          <View style={styles.ownerAccountList}>
-            <Text style={styles.fieldLabel}>Pilih akun owner</Text>
-            {DAFTAR_OWNER.map((akun) => (
-              <Pressable
-                key={akun.username}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: selectedOwner?.username === akun.username }}
-                onPress={() => setSelectedOwner(akun)}
-                style={[
-                  styles.ownerAccountOption,
-                  selectedOwner?.username === akun.username && styles.selectedOwnerAccountOption,
-                ]}
-              >
-                <Text style={styles.ownerAccountName}>{akun.namaWarung}</Text>
-                <Text style={styles.ownerAccountUsername}>@{akun.username}</Text>
-              </Pressable>
-            ))}
+        {LOGIN_FIELDS.map((field) => (
+          <View key={field.userName} style={styles.inputGroup}>
+            <Text style={styles.fieldLabel}>{field.label}</Text>
+            <TextInput
+              accessibilityLabel={field.label}
+              autoCapitalize={field.autoCapitalize}
+              autoCorrect={field.autoCorrect}
+              keyboardType={field.keyboardType}
+              nativeID={`login-${field.userName}`}
+              placeholder={field.placeholder}
+              placeholderTextColor="#9A9AAF"
+              secureTextEntry={field.secureTextEntry}
+              selectionColor="#6B2EEF"
+              style={styles.textInput}
+            />
           </View>
-        ) : (
-          LOGIN_FIELDS.map((field) => (
-            <View key={field.id} style={styles.inputGroup}>
-              <Text style={styles.fieldLabel}>{field.label}</Text>
-              <TextInput
-                accessibilityLabel={field.label}
-                autoCapitalize={field.autoCapitalize}
-                autoCorrect={field.autoCorrect}
-                keyboardType={field.keyboardType}
-                nativeID={`login-${field.id}`}
-                placeholder={field.placeholder}
-                placeholderTextColor="#9A9AAF"
-                secureTextEntry={field.secureTextEntry}
-                selectionColor="#6B2EEF"
-                style={styles.textInput}
-              />
-            </View>
-          ))
-        )}
+        ))}
 
         <View style={styles.formOptions}>
           <View style={styles.rememberOption}>
@@ -184,59 +135,24 @@ export default function LoginPage() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityState={{
-            disabled: role === "owner" && selectedOwner === null,
-          }}
-          disabled={role === "owner" && selectedOwner === null}
-          onPress={() => {
-            if (role === "customer") {
-              router.replace("/customer");
-            } else if (selectedOwner) {
-              setOwner(selectedOwner);
-              router.replace("/owner");
-            }
-          }}
           style={({ pressed }) => [
             styles.loginButton,
             pressed && styles.loginButtonPressed,
-            role === "owner" && selectedOwner === null && styles.loginButtonDisabled,
           ]}
         >
           <Text style={styles.loginButtonText}>
-            Masuk sebagai {getRoleLabel(role)}
+            Masuk sebagai {role === "owner" ? "Owner" : "Customer"}
           </Text>
           <Text style={styles.loginButtonArrow}>→</Text>
         </Pressable>
 
         <View style={styles.signupPrompt}>
           <Text style={styles.signupText}>Belum punya akun? </Text>
-          <Pressable accessibilityRole="button">
+          <Pressable onPress={() => ROUTER.replace("/registerPage")} accessibilityRole="button">
             <Text style={styles.signupLink}>Daftar sekarang</Text>
           </Pressable>
         </View>
       </View>
-
-      <Text style={styles.footerText}>© 2026 KantekMu. Semua hak dilindungi.</Text>
-    </View>
-  );
-
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.keyboardContainer}
-      >
-        <ScrollView
-          nativeID="login-screen"
-          contentContainerStyle={[styles.page, isWide && styles.widePage]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {isWide && <HeroPanel/>}
-          {loginForm}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    </AuthPageLayout>
   );
 }
