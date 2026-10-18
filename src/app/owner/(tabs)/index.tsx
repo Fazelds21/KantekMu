@@ -5,7 +5,7 @@ import PageHeader from "@/components/PageHeader";
 
 export default function OwnerBerandaScreen() {
   const router = useRouter();
-  const { owner, setOwner, pesanan, menu } = useApp();
+  const { owner, setOwner, setOwnerAccountId, pesanan, menu } = useApp();
 
   if (!owner) return <Redirect href="/" />;
 
@@ -22,6 +22,7 @@ export default function OwnerBerandaScreen() {
 
   const handleLogout = () => {
     setOwner(null);
+    setOwnerAccountId(null);
     router.replace("/");
   };
 

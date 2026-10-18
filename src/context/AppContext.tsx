@@ -85,6 +85,9 @@ type AppContextType = {
   hapusMenu: (warungId: string, menuId: string) => Promise<void>;
   owner: OwnerWarung | null;
   setOwner: (owner: OwnerWarung | null) => void;
+  ownerAccountId: number | null;
+  setOwnerAccountId: (ownerId: number | null) => void;
+  refreshWarungDanMenu: () => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -143,6 +146,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [menuLoading, setMenuLoading] = useState(true);
   const [menuError, setMenuError] = useState<string | null>(null);
   const [owner, setOwner] = useState<OwnerWarung | null>(null);
+  const [ownerAccountId, setOwnerAccountId] = useState<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -300,6 +304,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMenuError(null);
   };
 
+  const refreshWarungDanMenu = async () => {
+    try {
+      const [menuFromDatabase, warungListFromDatabase] = await Promise.all([
+        loadMenuFromDatabase(),
+        loadWarungListFromDatabase(),
+      ]);
+      setMenu(menuFromDatabase);
+      setWarungList(warungListFromDatabase);
+      setMenuError(null);
+    } catch (error) {
+      console.error("Gagal memperbarui data warung dan menu:", error);
+      setMenuError("Data warung dan menu gagal dimuat dari database.");
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -320,6 +339,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         hapusMenu,
         owner,
         setOwner,
+        ownerAccountId,
+        setOwnerAccountId,
+        refreshWarungDanMenu,
       }}
     >
       {children}

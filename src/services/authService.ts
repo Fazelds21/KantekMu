@@ -78,21 +78,17 @@ export async function loginUser(data: LoginData): Promise<AuthenticatedUser> {
       authenticatedUser.id,
     );
 
-    if (!stall) {
-      throw new Error(
-        "Akun Owner ini belum memiliki data warung. Hubungkan akun dengan warung terlebih dahulu.",
-      );
-    }
-
     return {
       id: authenticatedUser.id,
       username: authenticatedUser.username,
       email: authenticatedUser.email,
       role: authenticatedUser.role,
-      stall: {
+      ...(stall && {
+        stall: {
         warungId: String(stall.id),
         namaWarung: stall.name,
-      },
+        },
+      }),
     };
   }
 
@@ -143,4 +139,45 @@ export async function registerUser(data: RegisterData) {
   );
 
   return { message: "Registrasi berhasil." };
+}
+
+export async function createOwnerStall(
+  ownerId: number,
+  stallName: string,
+): Promise<{ warungId: string; namaWarung: string }> {
+  const name = stallName.trim();
+  if (!name) {
+    throw new Error("Nama warung wajib diisi.");
+  }
+
+  const db = await dbPromise;
+  const owner = await db.getFirstAsync<{ id: number }>(
+    "SELECT id FROM users WHERE id = ? AND role = 'owner'",
+    ownerId,
+  );
+  if (!owner) {
+    throw new Error("Akun Owner tidak ditemukan. Silakan login kembali.");
+  }
+
+  const existingStall = await db.getFirstAsync<{ id: number; name: string }>(
+    "SELECT id, name FROM stalls WHERE owner_id = ? ORDER BY id LIMIT 1",
+    ownerId,
+  );
+  if (existingStall) {
+    return {
+      warungId: String(existingStall.id),
+      namaWarung: existingStall.name,
+    };
+  }
+
+  const result = await db.runAsync(
+    "INSERT INTO stalls (owner_id, name) VALUES (?, ?)",
+    ownerId,
+    name,
+  );
+
+  return {
+    warungId: String(result.lastInsertRowId),
+    namaWarung: name,
+  };
 }

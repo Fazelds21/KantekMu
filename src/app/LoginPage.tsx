@@ -51,7 +51,7 @@ const LOGIN_ROLES: { value: LoginRole; label: string }[] = [
 
 export default function LoginPage() {
   const ROUTER = useRouter();
-  const { setOwner } = useApp();
+  const { setOwner, setOwnerAccountId } = useApp();
   const [role, setRole] = useState<LoginRole>("customer");
   const [rememberMe, setRememberMe] = useState(false);
   const [identifier, setIdentifier] = useState("");
@@ -65,11 +65,18 @@ export default function LoginPage() {
     try {
       const user = await loginUser({ identifier, password, role });
 
-      if (user.role === "owner" && user.stall) {
-        setOwner(user.stall);
-        ROUTER.replace("/owner");
+      if (user.role === "owner") {
+        setOwnerAccountId(user.id);
+        if (user.stall) {
+          setOwner(user.stall);
+          ROUTER.replace("/owner");
+        } else {
+          setOwner(null);
+          ROUTER.replace("/owner/setup-stall");
+        }
       } else {
         setOwner(null);
+        setOwnerAccountId(null);
         ROUTER.replace("/customer");
       }
     } catch (error) {
