@@ -1,8 +1,16 @@
 import AuthPageLayout from "@/components/AuthPageLayout";
+import { registerUser } from "@/services/authService";
 import { styles } from "@/styles/loginStyles";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, TextInput, TextInputProps, View } from "react-native";
+import {
+  Pressable,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+  Alert,
+} from "react-native";
 
 type RegisterRole = "owner" | "customer";
 
@@ -51,8 +59,42 @@ const REGISTER_ROLES: { value: RegisterRole; label: string }[] = [
 
 export default function RegisterPage() {
   const ROUTER = useRouter();
+
   const [role, setRole] = useState<RegisterRole>("customer");
   const [rememberMe, setRememberMe] = useState(false);
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleRegister = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      await registerUser({
+        username,
+        email,
+        password,
+        role,
+      });
+
+      Alert.alert("Berhasil", "Akun berhasil dibuat.");
+
+      ROUTER.replace("/LoginPage");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan saat mendaftar.";
+
+      Alert.alert("Registrasi gagal", message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <AuthPageLayout screenID="register-screen" panelID="register-form-panel">
@@ -117,20 +159,38 @@ export default function RegisterPage() {
               secureTextEntry={field.secureTextEntry}
               selectionColor="#6B2EEF"
               style={styles.textInput}
+              value={
+                field.id === "username"
+                  ? username
+                  : field.id === "email"
+                    ? email
+                    : password
+              }
+              onChangeText={(value) => {
+                if (field.id === "username") setUsername(value);
+                else if (field.id === "email") setEmail(value);
+                else setPassword(value);
+              }}
             />
           </View>
         ))}
 
         <View>
-          <Pressable style={styles.loginButton}>
-            <Text style={styles.loginButtonText}>Daftar</Text>
+          <Pressable style={styles.loginButton} onPress={handleRegister} disabled={isSubmitting}>
+            <Text style={styles.loginButtonText}>{isSubmitting ? "Memproses..." : "Daftar"}</Text>
           </Pressable>
         </View>
 
         <View style={styles.signupPrompt}>
           <Text style={styles.signupText}>Sudah punya akun?</Text>
           <Pressable>
-            <Text onPress={() => ROUTER.replace("/LoginPage")} style={styles.signupLink} accessibilityRole="button">Masuk sekarang</Text>
+            <Text
+              onPress={() => ROUTER.replace("/LoginPage")}
+              style={styles.signupLink}
+              accessibilityRole="button"
+            >
+              Masuk sekarang
+            </Text>
           </Pressable>
         </View>
       </View>

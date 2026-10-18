@@ -1,6 +1,8 @@
 import AuthPageLayout from "@/components/AuthPageLayout";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { useApp } from "@/context/AppContext";
+import { loginUser } from "@/services/authService";
 import {
   Pressable,
   Switch,
@@ -8,6 +10,7 @@ import {
   TextInput,
   type TextInputProps,
   View,
+  Alert,
 } from "react-native";
 import { styles } from "../styles/loginStyles";
 
@@ -26,8 +29,8 @@ type LoginField = {
 const LOGIN_FIELDS: LoginField[] = [
   {
     userName: "username",
-    label: "Username",
-    placeholder: "Masukkan username",
+    label: "Username atau email",
+    placeholder: "Masukkan username atau email",
     keyboardType: "email-address",
     autoCapitalize: "none",
     autoCorrect: false,
@@ -48,8 +51,37 @@ const LOGIN_ROLES: { value: LoginRole; label: string }[] = [
 
 export default function LoginPage() {
   const ROUTER = useRouter();
+  const { setOwner } = useApp();
   const [role, setRole] = useState<LoginRole>("customer");
   const [rememberMe, setRememberMe] = useState(false);
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleLogin = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const user = await loginUser({ identifier, password, role });
+
+      if (user.role === "owner" && user.stall) {
+        setOwner(user.stall);
+        ROUTER.replace("/owner");
+      } else {
+        setOwner(null);
+        ROUTER.replace("/customer");
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan saat masuk.";
+      Alert.alert("Login gagal", message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <AuthPageLayout screenID="login-screen" panelID="login-form-panel">
@@ -113,6 +145,10 @@ export default function LoginPage() {
               secureTextEntry={field.secureTextEntry}
               selectionColor="#6B2EEF"
               style={styles.textInput}
+              value={field.userName === "username" ? identifier : password}
+              onChangeText={
+                field.userName === "username" ? setIdentifier : setPassword
+              }
             />
           </View>
         ))}
@@ -135,13 +171,17 @@ export default function LoginPage() {
 
         <Pressable
           accessibilityRole="button"
+          disabled={isSubmitting}
+          onPress={handleLogin}
           style={({ pressed }) => [
             styles.loginButton,
             pressed && styles.loginButtonPressed,
           ]}
         >
           <Text style={styles.loginButtonText}>
-            Masuk sebagai {role === "owner" ? "Owner" : "Customer"}
+            {isSubmitting
+              ? "Memeriksa akun..."
+              : `Masuk sebagai ${role === "owner" ? "Owner" : "Customer"}`}
           </Text>
           <Text style={styles.loginButtonArrow}>→</Text>
         </Pressable>
@@ -149,7 +189,7 @@ export default function LoginPage() {
         <View style={styles.signupPrompt}>
           <Text style={styles.signupText}>Belum punya akun? </Text>
           <Pressable
-            onPress={() => ROUTER.replace("/owner/qr-preview")}
+            onPress={() => ROUTER.replace("/RegisterPage")}
             accessibilityRole="button"
           >
             <Text style={styles.signupLink}>Daftar sekarang</Text>
