@@ -52,6 +52,15 @@ export default function CustomerDashboard() {
         <Text style={styles.nomorMejaText}>Nomor Meja: {nomorMeja}</Text>
       </View>
 
+      <TouchableOpacity
+        style={styles.scanButton}
+        activeOpacity={0.8}
+        onPress={() => router.push("/customer/scan-qr")}
+      >
+        <Feather name="maximize" size={18} color="#FFF" />
+        <Text style={styles.scanButtonText}>Scan QR Meja</Text>
+      </TouchableOpacity>
+
       <View style={styles.sectionContainer}>
         <Text style={styles.pesananAktif}>Pesanan aktif: {pesanan.length}</Text>
         <Text style={styles.sectionTitle}>Warung Sekitar</Text>
@@ -99,6 +108,8 @@ const styles = StyleSheet.create({
   // nomor meja
   nomorMeja: { marginHorizontal: 16, marginTop: -20, height: 54, backgroundColor: "#D4A373", borderRadius: 14, justifyContent: "center", alignItems: "center" },
   nomorMejaText: { fontSize: 16, fontWeight: "700", color: "#FFF" },
+  scanButton: { marginHorizontal: 16, marginTop: 12, minHeight: 48, backgroundColor: "#C2410C", borderRadius: 12, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, elevation: 2 },
+  scanButtonText: { color: "#FFF", fontSize: 15, fontWeight: "700" },
 
   // daftar warung
   sectionContainer: { padding: 16 },

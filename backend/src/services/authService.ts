@@ -27,3 +27,20 @@ export async  function registerUser(
 
     return createUser(userName, email, passwordHash, role)
 }
+
+export async function loginUser(email: string, password: string){
+    const existingUser = await findUserByEmail(email);
+    if (!existingUser){
+        throw new Error("Email atau password salah.");
+    } 
+    
+    const passwordIsValid = await bcrypt.compare(password, existingUser.password_hash);
+    if (!passwordIsValid){
+        throw new Error("Email atau password salah.")}
+
+    return {
+            id: existingUser.id,
+            username: existingUser.username,
+            email: existingUser.email,
+            role: existingUser.role}
+}

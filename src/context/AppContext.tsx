@@ -138,7 +138,7 @@ function getDatabaseId(value: string, fieldName: string): number {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [nomorMeja, setNomorMeja] = useState("12");
+  const [nomorMeja, setNomorMeja] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pesanan, setPesanan] = useState<Pesanan[]>([]);
   const [warungList, setWarungList] = useState<Warung[]>([]);

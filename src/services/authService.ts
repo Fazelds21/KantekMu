@@ -2,6 +2,8 @@ import { dbPromise } from "@/database/db";
 import * as bcrypt from "bcryptjs";
 import * as Crypto from "expo-crypto";
 
+const API_URL = "http://192.168.1.14:3000";
+
 bcrypt.setRandomFallback((byteCount) =>
   Array.from(Crypto.getRandomBytes(byteCount)),
 );
@@ -14,9 +16,8 @@ export type RegisterData = {
 };
 
 export type LoginData = {
-  identifier: string;
+  email: string;
   password: string;
-  role: "owner" | "customer";
 };
 
 type UserRow = {
@@ -39,70 +40,28 @@ export type AuthenticatedUser = {
 };
 
 export async function loginUser(data: LoginData): Promise<AuthenticatedUser> {
-  const db = await dbPromise;
-  const identifier = data.identifier.trim();
+  const response = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: data.email,
+      password: data.password
+    })
+  })
 
-  if (!identifier || !data.password) {
-    throw new Error("Username/email dan password wajib diisi.");
+  const result = await response.json();
+
+  if (!response.ok){
+    throw new Error(result.message)
   }
 
-  const users = await db.getAllAsync<UserRow>(
-    `SELECT id, username, email, password_hash, role
-     FROM users
-     WHERE username = ? COLLATE NOCASE OR email = ? COLLATE NOCASE`,
-    identifier,
-    identifier.toLowerCase(),
-  );
+  return result.user
 
-  let authenticatedUser: UserRow | undefined;
-  for (const user of users) {
-    if (await bcrypt.compare(data.password, user.password_hash)) {
-      authenticatedUser = user;
-      break;
-    }
-  }
-
-  if (!authenticatedUser) {
-    throw new Error("Username/email atau password salah.");
-  }
-
-  if (authenticatedUser.role !== data.role) {
-    throw new Error(
-      `Akun ini terdaftar sebagai ${authenticatedUser.role === "owner" ? "Owner" : "Customer"}. Pilih role yang sesuai.`,
-    );
-  }
-
-  if (authenticatedUser.role === "owner") {
-    const stall = await db.getFirstAsync<{ id: number; name: string }>(
-      "SELECT id, name FROM stalls WHERE owner_id = ? ORDER BY id LIMIT 1",
-      authenticatedUser.id,
-    );
-
-    return {
-      id: authenticatedUser.id,
-      username: authenticatedUser.username,
-      email: authenticatedUser.email,
-      role: authenticatedUser.role,
-      ...(stall && {
-        stall: {
-        warungId: String(stall.id),
-        namaWarung: stall.name,
-        },
-      }),
-    };
-  }
-
-  return {
-    id: authenticatedUser.id,
-    username: authenticatedUser.username,
-    email: authenticatedUser.email,
-    role: authenticatedUser.role,
-  };
 }
 
 export async function registerUser(data: RegisterData) {
-  const db = await dbPromise;
-
   const username = data.username.trim();
   const email = data.email.trim().toLowerCase();
 
@@ -114,31 +73,31 @@ export async function registerUser(data: RegisterData) {
     throw new Error("Format email tidak valid.");
   }
 
-  if (data.password.length <= 8) {
+  if (data.password.length <= 7) {
     throw new Error("Password minimal 8 karakter.");
   }
+  
+  const response = await fetch(`${API_URL}/api/auth/register`,{
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userName: username,
+      email: email,
+      password: data.password,
+      role: data.role
+    })
+  })
 
-  const existingUser = await db.getFirstAsync<{ id: number }>(
-    "SELECT id FROM users WHERE email = ?",
-    email,
-  );
+  const result = await response.json();
 
-  if (existingUser) {
-    throw new Error("Email sudah terdaftar.");
+  if (!response.ok){
+    throw new Error(result.message);
   }
 
-  const passwordHash = await bcrypt.hash(data.password, 12);
+  return result.message;
 
-  await db.runAsync(
-    `INSERT INTO users (username, email, password_hash, role)
-    VALUES (?, ?, ?, ?)`,
-    username,
-    email,
-    passwordHash,
-    data.role,
-  );
-
-  return { message: "Registrasi berhasil." };
 }
 
 export async function createOwnerStall(

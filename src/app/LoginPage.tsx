@@ -28,9 +28,9 @@ type LoginField = {
 
 const LOGIN_FIELDS: LoginField[] = [
   {
-    userName: "username",
-    label: "Username atau email",
-    placeholder: "Masukkan username atau email",
+    userName: "email",
+    label: "Email",
+    placeholder: "Masukkan email",
     keyboardType: "email-address",
     autoCapitalize: "none",
     autoCorrect: false,
@@ -63,7 +63,19 @@ export default function LoginPage() {
 
     setIsSubmitting(true);
     try {
-      const user = await loginUser({ identifier, password, role });
+      if (!identifier.trim()) {
+        throw new Error("Email wajib diisi.");
+      }
+
+      if (!password.trim()) {
+        throw new Error("Password wajib diisi.");
+      }
+
+      const user = await loginUser({ email: identifier, password });
+
+      if (user.role !== role) {
+        throw new Error("Login tidak sesuai.");
+      }
 
       if (user.role === "owner") {
         setOwnerAccountId(user.id);
@@ -152,9 +164,9 @@ export default function LoginPage() {
               secureTextEntry={field.secureTextEntry}
               selectionColor="#6B2EEF"
               style={styles.textInput}
-              value={field.userName === "username" ? identifier : password}
+              value={field.userName === "email" ? identifier : password}
               onChangeText={
-                field.userName === "username" ? setIdentifier : setPassword
+                field.userName === "email" ? setIdentifier : setPassword
               }
             />
           </View>

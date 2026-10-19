@@ -18,7 +18,7 @@ export async function createUser(
 
 export async function findUserByEmail(email: string) {
     const result = await pool.query(
-        `SELECT id, username, email, role
+        `SELECT id, username, email, role, password_hash
         FROM public.users
         WHERE email = $1
         LIMIT 1`, [email]
