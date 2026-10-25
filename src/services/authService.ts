@@ -1,8 +1,12 @@
 import { dbPromise } from "@/database/db";
 import * as bcrypt from "bcryptjs";
 import * as Crypto from "expo-crypto";
+import Constants from "expo-constants";
 
-const API_URL = "http://192.168.1.14:3000";
+const hostUri = Constants.expoConfig?.hostUri;
+const ip = hostUri ? hostUri.split(":")[0] : "localhost";
+const API_URL = `http://${ip}:3000`;
+
 
 bcrypt.setRandomFallback((byteCount) =>
   Array.from(Crypto.getRandomBytes(byteCount)),
@@ -47,18 +51,17 @@ export async function loginUser(data: LoginData): Promise<AuthenticatedUser> {
     },
     body: JSON.stringify({
       email: data.email,
-      password: data.password
-    })
-  })
+      password: data.password,
+    }),
+  });
 
   const result = await response.json();
 
-  if (!response.ok){
-    throw new Error(result.message)
+  if (!response.ok) {
+    throw new Error(result.message);
   }
 
-  return result.user
-
+  return result.user;
 }
 
 export async function registerUser(data: RegisterData) {
@@ -76,8 +79,8 @@ export async function registerUser(data: RegisterData) {
   if (data.password.length <= 7) {
     throw new Error("Password minimal 8 karakter.");
   }
-  
-  const response = await fetch(`${API_URL}/api/auth/register`,{
+
+  const response = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -86,18 +89,17 @@ export async function registerUser(data: RegisterData) {
       userName: username,
       email: email,
       password: data.password,
-      role: data.role
-    })
-  })
+      role: data.role,
+    }),
+  });
 
   const result = await response.json();
 
-  if (!response.ok){
+  if (!response.ok) {
     throw new Error(result.message);
   }
 
   return result.message;
-
 }
 
 export async function createOwnerStall(

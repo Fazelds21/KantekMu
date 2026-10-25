@@ -11,6 +11,7 @@ export async function register(req: Request, res: Response) {
       user,
     });
   } catch (error) {
+    console.error("REGISTER ERROR:", error);
     if (error instanceof Error) {
       if (error.message === "Email sudah terdaftar.") {
         return res.status(409).json({
@@ -46,6 +47,7 @@ export async function login(req: Request, res: Response){
             user
         })
     }catch (error){
+        console.error("REGISTER ERROR:", error);
         if (error instanceof Error){
             if (error.message === "Email atau password salah."){
                 return res.status(401).json({
